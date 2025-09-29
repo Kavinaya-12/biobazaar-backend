@@ -3,13 +3,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const Profile = require("../models/profileModel");
 
+
 exports.createUser = async (req, res) => {
     const { username, email, password } = req.body;
     try {
-        // hash password before saving
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "Email already registered" });
+        }
+
+        // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Create new user
         const newUser = new User({
             username,
             email,
@@ -17,19 +25,23 @@ exports.createUser = async (req, res) => {
         });
         await newUser.save();
 
+        // Create empty profile for the user
         const newProfile = new Profile({
             userId: newUser._id,
-            fullName: username, 
+            fullName: username,
             bio: "",
             location: "",
             profilePicture: ""
         });
         await newProfile.save();
 
-        res.status(200).json({ message: "User created successfully", userId: newUser._id });
+        res.status(200).json({ 
+            message: "User created successfully", 
+            userId: newUser._id 
+        });
     } catch (e) {
-        console.log(e);
-        res.status(400).json({ error: e.message });
+        console.error("❌ Error in createUser:", e);
+        res.status(500).json({ error: e.message || "Internal server error" });
     }
 };
 
