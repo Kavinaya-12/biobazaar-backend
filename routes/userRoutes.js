@@ -4,7 +4,7 @@ const { authenticate, upload } = require("../middleware/auth");
 const userController = require("../controllers/userController");
 
 userRouter.get("/",userController.getUser);
-userRouter.post("/register", userController.createUser);
+userRouter.post("/", userController.createUser);
 userRouter.post("/login", userController.login);
 userRouter.post("/logout",userController.logout);
 userRouter.delete("/signout",userController.delete);
