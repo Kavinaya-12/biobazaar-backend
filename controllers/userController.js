@@ -4,32 +4,35 @@ const jwt = require("jsonwebtoken");
 const Profile = require("../models/profileModel");
 
 exports.createUser = async (req, res) => {
-  const { username, email, password } = req.body;
-  try {
-    const newUser = new User({ username, email, password });
-    await newUser.save();
-
+    const { username, email, password } = req.body;
     try {
-      const newProfile = new Profile({
-        userId: newUser._id,
-        fullName: username,
-        bio: "",
-        location: "",
-        profilePicture: ""
-      });
-      await newProfile.save();
+        // hash password before saving
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-      res.status(200).json({ message: "User created successfully", userId: newUser._id });
-    } catch (profileErr) {
-      // rollback user if profile fails
-      await User.findByIdAndDelete(newUser._id);
-      return res.status(400).json({ error: profileErr.message });
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword
+        });
+        await newUser.save();
+
+        const newProfile = new Profile({
+            userId: newUser._id,
+            fullName: username, 
+            bio: "",
+            location: "",
+            profilePicture: ""
+        });
+        await newProfile.save();
+
+        res.status(200).json({ message: "User created successfully", userId: newUser._id });
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({ error: e.message });
     }
-  } catch (e) {
-    console.log(e);
-    res.status(400).json({ error: e.message });
-  }
 };
+
 
 
 
