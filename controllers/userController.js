@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Profile = require("../models/profileModel");
 
+
 exports.createUser = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -12,14 +13,10 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ success: false, error: "Email already registered" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-   
     const newUser = new User({
       username,
       email,
-      password: hashedPassword,
+      password,
     });
     await newUser.save();
 
@@ -38,11 +35,10 @@ exports.createUser = async (req, res) => {
       userId: newUser._id,
     });
   } catch (error) {
-    console.error("❌ Error in createUser:", error);
+    console.error("Error in createUser:", error);
     return res.status(500).json({ success: false, error: error.message || "Internal server error" });
   }
 };
-
 
 exports.getUser = async (req, res) => {
   try {
@@ -81,16 +77,14 @@ exports.login = async (req, res) => {
       email: user.email,
     });
   } catch (error) {
-    console.error("❌ Error in login:", error);
+    console.error("Error in login:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-
 exports.logout = async (req, res) => {
   return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
-
 
 exports.delete = async (req, res) => {
   const { email } = req.body;

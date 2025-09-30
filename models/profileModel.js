@@ -12,11 +12,11 @@ const profileSchema = new mongoose.Schema({
     },
     bio: {
         type: String,
-        required: true
+        default: ""
     },
     location: {
         type: String,
-        required: true
+        default: ""
     },
     profilePicture: {
         type: String // Assuming you're storing a path to the profile picture
